@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %} Записи сообщества {{ group.title }}{% endblock %}
+{% block content %}
+  <h1> {{ group.title }} </h1>
+  <p> {{ group.description }} </p>
+  {% for post in page_obj %}
+    <article>
+      <ul>
+        <li>
+          Автор: {% if post.author.get_full_name %}{{ post.author.get_full_name }}{% else %}{{ post.author }}{% endif %} <a href="{% url 'posts:profile' post.author %}">все посты пользователя</a>
+        </li>
+        <li>
+          Дата публикации: {{ post.pub_date|date:"d E Y" }}
+        </li>
+      </ul>
+      <p>{{ post.text }}</p>
+      <a href="{% url 'posts:post_detail' post.id %}">подробная информация</a><br>
+      {% if not forloop.last %}<hr>{% endif %}
+    </article> 
+  {% endfor%}
+  <div>{% include 'posts/includes/paginator.html' %}</div>
+{% endblock %}
