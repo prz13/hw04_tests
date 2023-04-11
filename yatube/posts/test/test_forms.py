@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
+from posts.models import Group, Post
 
 
 User = get_user_model()
@@ -44,8 +45,7 @@ def post_create_form(self):
     self.assertEqual(Post.objects.count(), posts_count + 1)
     self.assertRedirects(response, reverse(
         'posts:profile',
-        kwargs={'username': self.post.author}
-                                    )
+        kwargs={'username': self.post.author})
     )
     self.assertEqual(post_latest.text, form_data['text'])
     self.assertEqual(post_latest.group.id, form_data['group'])
@@ -65,8 +65,7 @@ def post_edit_forms(self):
     edit_post_var = Post.objects.get(id=self.post.id)
     self.assertRedirects(response, reverse(
         'posts:post_detail',
-        kwargs={'post_id': self.post.id}
-                                    )
+        kwargs={'post_id': self.post.id})
     )
     self.assertEqual(Post.objects.count(), posts_count)
     self.assertEqual(edit_post_var.text, form_data['text'])

@@ -51,7 +51,7 @@ class PostsViewsTests(TestCase):
             'posts/create_post.html': reverse('posts:create'),
             'posts/group_list.html': reverse(
                 'posts:group_list',
-                kwargs={'slug':'test-slug'},
+                kwargs={'slug': 'test-slug'},
             )
         }
         for template, reverse_name in templates_pages_names.items():
@@ -66,13 +66,12 @@ class PostsViewsTests(TestCase):
         last_post = response.context['page_obj'][0]
         self.assertEqual(last_post, self.post)
 
-        # в первом элементе списка posts/group_list содержит ожидаемые значения 
+        # в первом элементе списка posts/group_list содержит ожидаемые значения
     def test_group_page_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом."""
         response = self.authorized_client.get(reverse(
-                                                'posts:group_list',
-                                                kwargs={'slug': self.group.slug})
-        )
+                                            'posts:group_list',
+                                            kwargs={'slug': self.group.slug}))
         # Взяли первый элемент из списка и проверили, что его содержание
         # совпадает с ожидаемым
         test_group = response.context['group']
