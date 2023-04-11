@@ -15,12 +15,13 @@ class StaticURLTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.post = Post.objects.create(
-                                        author=User.objects.create_user(
-                                        username='admin1',
-                                        email='root@root.net',
-                                        password='1234'
-                                        ),
-                                        text='Тестовая запись нового поста',)
+            author=User.objects.create_user(
+            username='admin1',
+            email='root@root.net',
+            password='1234'
+            ),
+            text='Тестовая запись нового поста',
+        )
 
         cls.group = Group.objects.create(
             title=('Заголовок для группы'),

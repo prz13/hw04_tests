@@ -69,9 +69,12 @@ class PostsViewsTests(TestCase):
         # в первом элементе списка posts/group_list содержит ожидаемые значения
     def test_group_page_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом."""
-        response = self.authorized_client.get(reverse(
-                                            'posts:group_list',
-                                            kwargs={'slug': self.group.slug}))
+        response = self.authorized_client.get(
+            reverse(
+                'posts:group_list',
+                kwargs={'slug': self.group.slug}
+            )
+        )
         # Взяли первый элемент из списка и проверили, что его содержание
         # совпадает с ожидаемым
         test_group = response.context['group']
