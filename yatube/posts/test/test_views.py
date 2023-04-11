@@ -34,15 +34,14 @@ class PostsViewsTests(TestCase):
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-        
-        
+
     def posts_check_all_fields(self, post):
         """Метод, проверяющий поля поста."""
         with self.subTest(post=post):
             self.assertEqual(post.text, self.post.text)
             self.assertEqual(post.author, self.post.author)
             self.assertEqual(post.group.id, self.post.group.id)
-        
+
         # Проверяем используемые шаблоны
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
@@ -59,7 +58,6 @@ class PostsViewsTests(TestCase):
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client.get(reverse_name)
                 self.assertTemplateUsed(response, template)
-                
 
     def test_index_page_show_correct_context(self):
         """Шаблон index сформирован с правильным контекстом."""
@@ -67,16 +65,14 @@ class PostsViewsTests(TestCase):
         self.posts_check_all_fields(response.context['page_obj'][0])
         last_post = response.context['page_obj'][0]
         self.assertEqual(last_post, self.post)
-                
 
-    # в первом элементе списка posts/group_list содержит ожидаемые значения 
+        # в первом элементе списка posts/group_list содержит ожидаемые значения 
     def test_group_page_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом."""
         response = self.authorized_client.get(reverse(
-                'posts:group_list',
-                kwargs={'slug': self.group.slug}
-                )
-                )
+                                                'posts:group_list',
+                                                kwargs={'slug': self.group.slug})
+        )
         # Взяли первый элемент из списка и проверили, что его содержание
         # совпадает с ожидаемым
         test_group = response.context['group']
@@ -84,8 +80,7 @@ class PostsViewsTests(TestCase):
         test_post = str(response.context['page_obj'][0])
         self.assertEqual(test_group, self.group)
         self.assertEqual(test_post, str(self.post))
-        
-        
+
     def test_posts_context_profile_context(self):
         """Проверка profile сформирован с правильным контекстом."""
         response = self.authorized_client.get(
@@ -104,7 +99,6 @@ class PostsViewsTests(TestCase):
         self.posts_check_all_fields(response.context['page_obj'][0])
         test_page = response.context['page_obj'][0]
         self.assertEqual(test_page, self.user.posts.all()[0])
-        
 
     def test_posts_context_post_detail_context(self):
         """Проверка post_detail сформирован с правильным контекстом."""
@@ -121,9 +115,6 @@ class PostsViewsTests(TestCase):
             with self.subTest(value=value):
                 context = response.context[value]
                 self.assertEqual(context, expected)
-                
-                
-    
 
 
 class PostsPaginatorViewsTests(TestCase):

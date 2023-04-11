@@ -20,13 +20,16 @@ class PostCreateFormTests(TestCase):
             description='Тестовое описание',
             slug='test-slug'
         )
+
+
 def setUp(self):
     self.authorized_author = Client()
     self.authorized_author.force_login(self.author)
 
+
 def post_create_form(self):
     """Создали новый пост."""
-    # Подсчитаем количество записей 
+    # Подсчитаем количество записей
     posts_count = Post.objects.count()
     form_data = {
         'text': 'Тестовый текст',
@@ -37,15 +40,16 @@ def post_create_form(self):
         data=form_data,
         follow=True
     )
-    post_latest = Post.objects.latest('id') 
-    self.assertEqual(Post.objects.count(), posts_count + 1) 
+    post_latest = Post.objects.latest('id')
+    self.assertEqual(Post.objects.count(), posts_count + 1)
     self.assertRedirects(response, reverse(
-        'posts:profile', 
+        'posts:profile',
         kwargs={'username': self.post.author}
-        )
-    ) 
-    self.assertEqual(post_latest.text, form_data['text']) 
+                                    )
+    )
+    self.assertEqual(post_latest.text, form_data['text'])
     self.assertEqual(post_latest.group.id, form_data['group'])
+
 
 def post_edit_forms(self):
     """Отредактировали пост."""
@@ -60,10 +64,10 @@ def post_edit_forms(self):
     )
     edit_post_var = Post.objects.get(id=self.post.id)
     self.assertRedirects(response, reverse(
-        'posts:post_detail', 
+        'posts:post_detail',
         kwargs={'post_id': self.post.id}
-        )
-    ) 
-    self.assertEqual(Post.objects.count(), posts_count) 
-    self.assertEqual(edit_post_var.text, form_data['text']) 
+                                    )
+    )
+    self.assertEqual(Post.objects.count(), posts_count)
+    self.assertEqual(edit_post_var.text, form_data['text'])
     self.assertEqual(edit_post_var.author, self.post.author)

@@ -2,10 +2,8 @@ from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 from .forms import PostForm
 from .models import Post, Group
-
 
 
 User = get_user_model()
