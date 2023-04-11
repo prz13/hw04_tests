@@ -16,9 +16,9 @@ class StaticURLTests(TestCase):
         super().setUpClass()
         cls.post = Post.objects.create(
             author=User.objects.create_user(
-            username='admin1',
-            email='root@root.net',
-            password='1234'
+                username='admin1',
+                email='root@root.net',
+                password='1234'
             ),
             text='Тестовая запись нового поста',
         )
