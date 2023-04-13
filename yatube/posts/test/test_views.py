@@ -50,6 +50,7 @@ class PostsViewsTests(TestCase):
 
     def setUp(self):
         self.authorized_client = Client()
+        self.authorized_client_author = Client()
         self.authorized_client.force_login(self.user)
 
     def posts_check_all_fields(self, post):
@@ -59,7 +60,6 @@ class PostsViewsTests(TestCase):
             self.assertEqual(post.author, self.post.author)
             self.assertEqual(post.group.id, self.post.group.id)
 
-        # Проверяем используемые шаблоны
     def test_pages_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон-2."""
         templates_pages_names = {
@@ -79,10 +79,8 @@ class PostsViewsTests(TestCase):
         """Шаблон index сформирован с правильным контекстом-3."""
         response = self.authorized_client.get(reverse('posts:index'))
         last_post = response.context['page_obj'][0]
-        #self.posts_check_all_fields(response.context['page_obj'][0])
         self.assertEqual(last_post, self.post)
 
-        # в первом элементе списка posts/group_list содержит ожидаемые значения
     def test_group_page_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом-4."""
         response = self.authorized_client.get(
@@ -91,8 +89,6 @@ class PostsViewsTests(TestCase):
                 kwargs={'slug': self.group.slug}
             )
         )
-        # Взяли первый элемент из списка и проверили, что его содержание
-        # совпадает с ожидаемым
         test_group = response.context['group']
         test_post = response.context['page_obj'][0]
         self.posts_check_all_fields(response.context['page_obj'][0])
@@ -101,38 +97,31 @@ class PostsViewsTests(TestCase):
 
     def test_posts_context_profile_context(self):
         """Проверка profile сформирован с правильным контекстом-5."""
-        response = self.authorized_client.get(
+        response = self.authorized_client_author.get(
             reverse(
                 'posts:profile',
-                kwargs={'username': cls.user.username},
+                kwargs={'username': self.user.username},
             )
         )
-        username = response.context['username']
-        self.page_template_test_query['page_obj']
-        self.assertEqual(username, cls.author.username)
+        self.assertEqual(response.context['author'], self.user)
 
     def test_posts_context_post_detail_context(self):
         """Проверка post_detail сформирован с правильным контекстом-6."""
         response = self.authorized_client.get(
             reverse(
                 'posts:post_detail',
-                kwargs={'post_id': cls.post.id},
+                kwargs={'post_id': self.post.id},
             )
         )
-        test_post_detail = response.context['post_deals']
-        test_page = response.context['page_obj'][0]
-        self.posts_check_all_fields(response.context['page_obj'][0])
-        self.assertEqual(test_page, cls.user.posts.all()[0])
+        self.assertEqual(response.context['post'].text, self.post.text)
+        
         
     def test_posts_context_post_create_context(self):
         """Проверка post_create сформирован с правильным контекстом-7."""
         response = self.authorized_client.get(
             reverse('posts:create')
         )
-        test_post_create = response.context['form']
-        test_post_create = response.context['post'][0]
-        self.posts_check_all_fields(response.context['page_obj'][0])
-        self.assertEqual(edit, self.user.posts.all()[0])
+        self.assertIsInstance(response.context['form'], PostForm)
         
         
     def test_posts_context_post_edit_context(self):
@@ -143,10 +132,10 @@ class PostsViewsTests(TestCase):
                 kwargs={'post_id': self.post.id},
             )
         )
-        test_post_edit = response.context['posts:edit']
-        test_page = response.context['page_obj'][0]
-        self.posts_check_all_fields(response.context['page_obj'][0])
-        self.assertEqual(test_page, self.user.posts.all()[0])
+        self.assertEqual(
+            response.context['form'].initial['text'],
+            self.post.text
+        )
 
 
 class PostsPaginatorViewsTests(TestCase):
@@ -165,7 +154,10 @@ class PostsPaginatorViewsTests(TestCase):
                 'posts:group_list',
                 kwargs={'slug': 'test-slug'},
             ),
-            
+            reverse(
+                'posts:profile',
+                kwargs={'username': cls.user.username}
+            ),
         }
 
     def test_posts_if_first_page_has_ten_records(self):
