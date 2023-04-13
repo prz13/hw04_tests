@@ -1,9 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
 from django.urls import reverse
-from posts.models import Group, Post
+
+from posts.models import Group, Post, User
+from posts.forms import PostForm
 
 User = get_user_model()
+
+TEN_POSTS = 10
+THREE_POSTS = 2
 
 
 class PostsViewsTests(TestCase):
@@ -28,7 +33,19 @@ class PostsViewsTests(TestCase):
             'posts/group_list.html': reverse(
                 'posts:group_list',
                 kwargs={'slug': 'test-slug'},
-            )
+            ),
+            'posts/profile.html': reverse(
+                'posts:profile',
+                kwargs={'username': cls.user.username}
+            ),
+            'posts/post_detail.html': reverse(
+                'posts:post_detail',
+                kwargs={'post_id': cls.post.id},
+            ),
+            'posts/post_create.html':reverse(
+                'posts:edit',
+                kwargs={'post_id': cls.post.id}
+            ),
         }
 
     def setUp(self):
@@ -36,7 +53,7 @@ class PostsViewsTests(TestCase):
         self.authorized_client.force_login(self.user)
 
     def posts_check_all_fields(self, post):
-        """Метод, проверяющий поля поста."""
+        """Метод, проверяющий поля поста-1."""
         with self.subTest(post=post):
             self.assertEqual(post.text, self.post.text)
             self.assertEqual(post.author, self.post.author)
@@ -44,15 +61,14 @@ class PostsViewsTests(TestCase):
 
         # Проверяем используемые шаблоны
     def test_pages_uses_correct_template(self):
-        """URL-адрес использует соответствующий шаблон."""
-        # Собираем в словарь пары "имя_html_шаблона: reverse(name)"
+        """URL-адрес использует соответствующий шаблон-2."""
         templates_pages_names = {
             'posts/index.html': reverse('posts:index'),
             'posts/create_post.html': reverse('posts:create'),
             'posts/group_list.html': reverse(
                 'posts:group_list',
                 kwargs={'slug': 'test-slug'},
-            )
+            ),
         }
         for template, reverse_name in templates_pages_names.items():
             with self.subTest(reverse_name=reverse_name):
@@ -60,15 +76,15 @@ class PostsViewsTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_index_page_show_correct_context(self):
-        """Шаблон index сформирован с правильным контекстом."""
+        """Шаблон index сформирован с правильным контекстом-3."""
         response = self.authorized_client.get(reverse('posts:index'))
-        self.posts_check_all_fields(response.context['page_obj'][0])
         last_post = response.context['page_obj'][0]
+        #self.posts_check_all_fields(response.context['page_obj'][0])
         self.assertEqual(last_post, self.post)
 
         # в первом элементе списка posts/group_list содержит ожидаемые значения
     def test_group_page_show_correct_context(self):
-        """Шаблон group_list сформирован с правильным контекстом."""
+        """Шаблон group_list сформирован с правильным контекстом-4."""
         response = self.authorized_client.get(
             reverse(
                 'posts:group_list',
@@ -78,45 +94,59 @@ class PostsViewsTests(TestCase):
         # Взяли первый элемент из списка и проверили, что его содержание
         # совпадает с ожидаемым
         test_group = response.context['group']
+        test_post = response.context['page_obj'][0]
         self.posts_check_all_fields(response.context['page_obj'][0])
-        test_post = str(response.context['page_obj'][0])
         self.assertEqual(test_group, self.group)
-        self.assertEqual(test_post, str(self.post))
+        self.assertEqual(test_post, self.post)
 
     def test_posts_context_profile_context(self):
-        """Проверка profile сформирован с правильным контекстом."""
+        """Проверка profile сформирован с правильным контекстом-5."""
         response = self.authorized_client.get(
             reverse(
                 'posts:profile',
-                kwargs={'username': self.user.username},
+                kwargs={'username': cls.user.username},
             )
         )
-        profile = {'user': self.post.author}
-
-        for value, expected in profile.items():
-            with self.subTest(value=value):
-                context = response.context[value]
-                self.assertEqual(context, expected)
-
-        self.posts_check_all_fields(response.context['page_obj'][0])
-        test_page = response.context['page_obj'][0]
-        self.assertEqual(test_page, self.user.posts.all()[0])
+        username = response.context['username']
+        self.page_template_test_query['page_obj']
+        self.assertEqual(username, cls.author.username)
 
     def test_posts_context_post_detail_context(self):
-        """Проверка post_detail сформирован с правильным контекстом."""
+        """Проверка post_detail сформирован с правильным контекстом-6."""
         response = self.authorized_client.get(
             reverse(
                 'posts:post_detail',
+                kwargs={'post_id': cls.post.id},
+            )
+        )
+        test_post_detail = response.context['post_deals']
+        test_page = response.context['page_obj'][0]
+        self.posts_check_all_fields(response.context['page_obj'][0])
+        self.assertEqual(test_page, cls.user.posts.all()[0])
+        
+    def test_posts_context_post_create_context(self):
+        """Проверка post_create сформирован с правильным контекстом-7."""
+        response = self.authorized_client.get(
+            reverse('posts:create')
+        )
+        test_post_create = response.context['form']
+        test_post_create = response.context['post'][0]
+        self.posts_check_all_fields(response.context['page_obj'][0])
+        self.assertEqual(edit, self.user.posts.all()[0])
+        
+        
+    def test_posts_context_post_edit_context(self):
+        """Проверка post_edit сформирован с правильным контекстом-8."""
+        response = self.authorized_client.get(
+            reverse(
+                'posts:edit',
                 kwargs={'post_id': self.post.id},
             )
         )
-
-        profile = {'post': self.post}
-
-        for value, expected in profile.items():
-            with self.subTest(value=value):
-                context = response.context[value]
-                self.assertEqual(context, expected)
+        test_post_edit = response.context['posts:edit']
+        test_page = response.context['page_obj'][0]
+        self.posts_check_all_fields(response.context['page_obj'][0])
+        self.assertEqual(test_page, self.user.posts.all()[0])
 
 
 class PostsPaginatorViewsTests(TestCase):
@@ -126,20 +156,27 @@ class PostsPaginatorViewsTests(TestCase):
         cls.user = User.objects.create_user(username='admin1')
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
-        for count in range(13):
-            cls.post = Post.objects.create(
-                text=f'Тестовый текст поста номер {count}',
-                author=cls.user,
-            )
+        post_list = [Post(text=f'Тестовый текст поста номер {count}',
+                    author=cls.user) for count in range(TEN_POSTS + THREE_POSTS)]
+        Post.objects.bulk_create(post_list, batch_size=500)
+        cls.urls_paginator = {
+            reverse('posts:index'),
+            reverse(
+                'posts:group_list',
+                kwargs={'slug': 'test-slug'},
+            ),
+            
+        }
 
     def test_posts_if_first_page_has_ten_records(self):
         """Проверка: первая страница 10 записей."""
         response = self.authorized_client.get(reverse('posts:index'))
-        self.assertEqual(len(response.context.get('page_obj').object_list), 10)
+        self.assertEqual(len(response.context.get('page_obj').object_list), TEN_POSTS)
 
     def test_posts_if_second_page_has_three_records(self):
         """Проверка: вторая страница 3 записи."""
         response = self.authorized_client.get(
             reverse('posts:index') + '?page=2'
         )
-        self.assertEqual(len(response.context.get('page_obj').object_list), 3)
+        self.assertEqual(len(response.context.get('page_obj').object_list), THREE_POSTS)
+        

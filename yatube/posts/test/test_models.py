@@ -18,11 +18,11 @@ class PostModelTest(TestCase):
         )
         cls.post = Post.objects.create(
             author=cls.user,
-            text='Тестовый пост',
+            text='Тестовый пост длинее',
         )
 
     def test_models_have_correct_object_names(self):
         """Проверяем, что у моделей корректно работает __str__."""
         post = PostModelTest.post
-        expected_object_name = post.text[:15]
+        expected_object_name = post.text[:20]
         self.assertEqual(expected_object_name, str(post))

@@ -4,6 +4,7 @@ from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase
+
 from posts.models import Group, Post
 
 
@@ -11,6 +12,7 @@ User = get_user_model()
 
 
 class StaticURLTests(TestCase):
+    TEST_SLUG = 'test_slug'
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -25,7 +27,7 @@ class StaticURLTests(TestCase):
 
         cls.group = Group.objects.create(
             title=('Заголовок для группы'),
-            slug='test_slug'
+            slug=cls.TEST_SLUG
         )
 
     def setUp(self):
@@ -39,6 +41,8 @@ class StaticURLTests(TestCase):
         url_names = (
             '/',
             '/group/test_slug/',
+            
+            
         )
         for adress in url_names:
             with self.subTest():
@@ -48,6 +52,7 @@ class StaticURLTests(TestCase):
     def test_create_for_authorized(self):
         """Страница доступна авторизованному пользователю."""
         response = self.authorized_client.get('/create/')
+        self.assertTrue(response.context['user'].is_authenticated)
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
     def test_unauthorized_url(self):
@@ -67,6 +72,7 @@ class StaticURLTests(TestCase):
             'posts/index.html': '/',
             'posts/group_list.html': '/group/test_slug/',
             'posts/create_post.html': '/create/',
+            
         }
         for template, address in templates_url_names.items():
             with self.subTest(address=address):
