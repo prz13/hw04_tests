@@ -12,7 +12,7 @@ User = get_user_model()
 
 
 class StaticURLTests(TestCase):
-    TEST_SLUG = 'test_slug'
+    
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -27,8 +27,11 @@ class StaticURLTests(TestCase):
 
         cls.group = Group.objects.create(
             title=('Заголовок для группы'),
-            slug=cls.TEST_SLUG
+            slug= 'test_slug'
         )
+        
+        
+        
 
     def setUp(self):
         self.guest_client = Client()
@@ -41,11 +44,11 @@ class StaticURLTests(TestCase):
         url_names = (
             '/',
             '/group/test_slug/',
-            
-            
+            '/profile/NoNoName/',
+            '/posts/1/',
         )
         for adress in url_names:
-            with self.subTest():
+            with self.subTest(adress=adress):
                 response = self.guest_client.get(adress)
                 self.assertEqual(response.status_code, HTTPStatus.OK)
 
@@ -60,11 +63,15 @@ class StaticURLTests(TestCase):
         url_names = (
             '/create/',
             '/admin/',
+            '/posts/post_id/edit/',
         )
         for adress in url_names:
             with self.subTest():
                 response = self.guest_client.get(adress)
                 self.assertEqual(response.status_code, HTTPStatus.FOUND)
+                self.assertIn('Location', response)
+            redirected_url = response['Location'] 
+            self.assertNotEqual(redirected_url, adress) 
 
     def test_url_uses_correct_template(self):
         """Проверка шаблона для адресов."""
@@ -82,3 +89,11 @@ class StaticURLTests(TestCase):
     def test_page_404(self):
         response = self.guest_client.get('/asdf098/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
+    def test_unauthorized_user_cannot_edit_post_of_another_user(self):
+        response = self.guest_client.get(
+            f'/posts/{self.post.id}/edit/'
+        )
+        self.assertRedirects(response,
+            f'/auth/login/?next=/posts/{self.post.id}/edit/'
+        )
