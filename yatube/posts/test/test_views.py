@@ -8,7 +8,7 @@ from posts.forms import PostForm
 User = get_user_model()
 
 TEN_POSTS = 10
-THREE_POSTS = 2
+THREE_POSTS = 3
 
 
 class PostsViewsTests(TestCase):
@@ -144,7 +144,8 @@ class PostsPaginatorViewsTests(TestCase):
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
         post_list = [Post(text=f'Тестовый текст поста номер {count}',
-                    author=cls.user)for count in range(TEN_POSTS + THREE_POSTS)]
+                            author=cls.user)
+                                for count in range(TEN_POSTS + THREE_POSTS)]
         Post.objects.bulk_create(post_list, batch_size=500)
         cls.urls_paginator = {
             reverse('posts:index'),
