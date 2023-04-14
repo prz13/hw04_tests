@@ -42,7 +42,7 @@ class PostsViewsTests(TestCase):
                 'posts:post_detail',
                 kwargs={'post_id': cls.post.id},
             ),
-            'posts/post_create.html':reverse(
+            'posts/post_create.html': reverse(
                 'posts:edit',
                 kwargs={'post_id': cls.post.id}
             ),
@@ -114,16 +114,14 @@ class PostsViewsTests(TestCase):
             )
         )
         self.assertEqual(response.context['post'].text, self.post.text)
-        
-        
+
     def test_posts_context_post_create_context(self):
         """Проверка post_create сформирован с правильным контекстом-7."""
         response = self.authorized_client.get(
             reverse('posts:create')
         )
         self.assertIsInstance(response.context['form'], PostForm)
-        
-        
+
     def test_posts_context_post_edit_context(self):
         """Проверка post_edit сформирован с правильным контекстом-8."""
         response = self.authorized_client.get(
@@ -146,7 +144,8 @@ class PostsPaginatorViewsTests(TestCase):
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
         post_list = [Post(text=f'Тестовый текст поста номер {count}',
-                    author=cls.user) for count in range(TEN_POSTS + THREE_POSTS)]
+                author=cls.user) for count in range(TEN_POSTS + THREE_POSTS)
+        ]
         Post.objects.bulk_create(post_list, batch_size=500)
         cls.urls_paginator = {
             reverse('posts:index'),
@@ -163,12 +162,13 @@ class PostsPaginatorViewsTests(TestCase):
     def test_posts_if_first_page_has_ten_records(self):
         """Проверка: первая страница 10 записей."""
         response = self.authorized_client.get(reverse('posts:index'))
-        self.assertEqual(len(response.context.get('page_obj').object_list), TEN_POSTS)
+        self.assertEqual(len(response.context.get(
+            'page_obj').object_list), TEN_POSTS)
 
     def test_posts_if_second_page_has_three_records(self):
         """Проверка: вторая страница 3 записи."""
         response = self.authorized_client.get(
             reverse('posts:index') + '?page=2'
         )
-        self.assertEqual(len(response.context.get('page_obj').object_list), THREE_POSTS)
-        
+        self.assertEqual(len(response.context.get(
+            'page_obj').object_list), THREE_POSTS)

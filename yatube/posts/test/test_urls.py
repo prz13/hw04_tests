@@ -12,7 +12,6 @@ User = get_user_model()
 
 
 class StaticURLTests(TestCase):
-    
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -27,11 +26,8 @@ class StaticURLTests(TestCase):
 
         cls.group = Group.objects.create(
             title=('Заголовок для группы'),
-            slug= 'test_slug'
+            slug='test_slug'
         )
-        
-        
-        
 
     def setUp(self):
         self.guest_client = Client()
@@ -70,8 +66,8 @@ class StaticURLTests(TestCase):
                 response = self.guest_client.get(adress)
                 self.assertEqual(response.status_code, HTTPStatus.FOUND)
                 self.assertIn('Location', response)
-            redirected_url = response['Location'] 
-            self.assertNotEqual(redirected_url, adress) 
+            redirected_url = response['Location']
+            self.assertNotEqual(redirected_url, adress)
 
     def test_url_uses_correct_template(self):
         """Проверка шаблона для адресов."""
@@ -79,7 +75,6 @@ class StaticURLTests(TestCase):
             'posts/index.html': '/',
             'posts/group_list.html': '/group/test_slug/',
             'posts/create_post.html': '/create/',
-            
         }
         for template, address in templates_url_names.items():
             with self.subTest(address=address):
@@ -95,5 +90,5 @@ class StaticURLTests(TestCase):
             f'/posts/{self.post.id}/edit/'
         )
         self.assertRedirects(response,
-            f'/auth/login/?next=/posts/{self.post.id}/edit/'
-        )
+                    f'/auth/login/?next=/posts/{self.post.id}/edit/')
+

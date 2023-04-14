@@ -23,11 +23,9 @@ class PostCreateFormTests(TestCase):
             slug='test-slug'
         )
 
-
     def setUp(self):
         self.authorized_author = Client()
         self.authorized_author.force_login(self.author)
-
 
     def post_create_form(self):
         """Создали новый пост."""
@@ -38,9 +36,9 @@ class PostCreateFormTests(TestCase):
             'group': self.group.slug
         }
         response = self.authorized_author.post(
-                        reverse('posts:post_create'),
-                        data=form_data,
-                        follow=True
+            reverse('posts:post_create'),
+            data=form_data,
+            follow=True
         )
         post_latest = Post.objects.latest('id')
         self.assertEqual(Post.objects.count(), posts_count + 1)
@@ -50,7 +48,6 @@ class PostCreateFormTests(TestCase):
         )
         self.assertEqual(post_latest.text, form_data['text'])
         self.assertEqual(post_latest.group.id, form_data['group'])
-
 
     def post_edit_forms(self):
         """Отредактировали пост."""
