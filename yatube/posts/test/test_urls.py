@@ -89,6 +89,6 @@ class StaticURLTests(TestCase):
         response = self.guest_client.get(
             f'/posts/{self.post.id}/edit/'
         )
-        self.assertRedirects(response,
-                    f'/auth/login/?next=/posts/{self.post.id}/edit/')
-
+        self.assertRedirects(
+                            response,
+                            f'/auth/login/?next=/posts/{self.post.id}/edit/')
