@@ -143,7 +143,8 @@ class PostsPaginatorViewsTests(TestCase):
         cls.user = User.objects.create_user(username='admin1')
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
-        post_list = [Post(text=f'Тестовый текст поста номер {count}',
+        post_list = [Post
+                    (text=f'Тестовый текст поста номер {count}',
                     author=cls.user) for count in range(
                     TEN_POSTS + THREE_POSTS)]
         Post.objects.bulk_create(post_list, batch_size=500)
