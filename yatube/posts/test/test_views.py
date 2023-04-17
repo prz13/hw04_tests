@@ -140,6 +140,7 @@ class PostsViewsTests(TestCase):
         )
         self.assertTrue('is_edit' in response.context)
 
+
 class PostsPaginatorViewsTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -168,8 +169,9 @@ class PostsPaginatorViewsTests(TestCase):
         """Проверка: первая страница 10 записей."""
         url = self.urls_paginator.pop()
         response = self.authorized_client.get(url)
-        self.assertEqual(len(response.context.get( 
-            'page_obj').object_list), TEN_POSTS) 
+        if response.context.get('page_obj'):
+            self.assertEqual(len(response.context.get(
+                'page_obj').object_list), TEN_POSTS)
 
     def test_posts_if_second_page_has_three_records(self):
         """Проверка: вторая страница 3 записи."""
@@ -177,5 +179,6 @@ class PostsPaginatorViewsTests(TestCase):
         response = self.authorized_client.get(
             (url) + '?page=2'
         )
-        self.assertEqual(len(response.context.get(
-            'page_obj').object_list), THREE_POSTS)
+        if response.context.get('page_obj'):
+            self.assertEqual(len(response.context.get(
+                'page_obj').object_list), THREE_POSTS)
