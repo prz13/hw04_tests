@@ -18,12 +18,11 @@ class PostModelTest(TestCase):
         )
         cls.post = Post.objects.create(
             author=cls.user,
-            text= 'Тестовая запись для создания нового поста'
+            text='Тестовая запись для создания нового поста'
         )
 
     def test_post_text(self):
         """Проверяем, что кореектно выводится первые 15
         символов поста метода __str__ Post."""
-        post = PostModelTest.post
-        text_post_object = self.post.text[:15]
+        self.post.text[:15]
         self.assertEqual(self.post.__str__(), self.post.text)
