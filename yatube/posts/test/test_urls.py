@@ -21,7 +21,7 @@ class StaticURLTests(TestCase):
                 email='root@root.net',
                 password='1234'
             ),
-            text='Тестовая запись нового поста',
+            text='Тестовая запись для создания нового поста',
         )
 
         cls.group = Group.objects.create(
@@ -37,11 +37,11 @@ class StaticURLTests(TestCase):
 
     def test_index_and_group(self):
         """страницы группы и главная доступны всем"""
-        url_names = (
-            '/',
-            '/group/test_slug/',
-            '/profile/NoNoName/',
-            '/posts/1/',
+        url_names =(
+            '/', 
+            f'/group/{self.group.slug}/',
+            f'/profile/{self.user.username}/',
+            f'/posts/{self.post.pk}/', 
         )
         for adress in url_names:
             with self.subTest(adress=adress):
@@ -56,18 +56,18 @@ class StaticURLTests(TestCase):
 
     def test_unauthorized_url(self):
         """Страница без авторизации недоступна"""
-        url_names = (
-            '/create/',
-            '/admin/',
-            '/posts/post_id/edit/',
-        )
-        for adress in url_names:
-            with self.subTest():
-                response = self.guest_client.get(adress)
+        url_names = {
+            '/create/': '/auth/login/?next=/create/',
+            '/admin/': '/admin/login/?next=/admin/',
+            '/posts/65/edit/': '/auth/login/?next=/posts/65/edit/',
+        }
+        for url, redirect in url_names.items():
+            with self.subTest(url=url):
+                response = self.guest_client.get(url)
                 self.assertEqual(response.status_code, HTTPStatus.FOUND)
                 self.assertIn('Location', response)
-            redirected_url = response['Location']
-            self.assertNotEqual(redirected_url, adress)
+            expected_url = response['Location']
+            self.assertRedirects(response, redirect)
 
     def test_url_uses_correct_template(self):
         """Проверка шаблона для адресов."""
@@ -85,10 +85,10 @@ class StaticURLTests(TestCase):
         response = self.guest_client.get('/asdf098/')
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
-    def test_unauthorized_user_cannot_edit_post_of_another_user(self):
-        response = self.guest_client.get(
-            f'/posts/{self.post.id}/edit/'
-        )
-        self.assertRedirects(
-            response,
-            f'/auth/login/?next=/posts/{self.post.id}/edit/')
+    def test_unauthorized_user_cannot_edit_post_of_another_user(self): 
+        response = self.guest_client.get( 
+            f'/posts/{self.post.id}/edit/' 
+        ) 
+        self.assertRedirects( 
+            response, 
+            f'/auth/login/?next=/posts/{self.post.id}/edit/') 

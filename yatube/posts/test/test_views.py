@@ -23,7 +23,7 @@ class PostsViewsTests(TestCase):
         )
 
         cls.post = Post.objects.create(
-            text='Привет!',
+            text='Тестовая запись для создания нового поста',
             author=cls.user,
             group=cls.group,
         )
@@ -91,7 +91,7 @@ class PostsViewsTests(TestCase):
         )
         test_group = response.context['group']
         test_post = response.context['page_obj'][0]
-        self.posts_check_all_fields(response.context['page_obj'][0])
+        self.posts_check_all_fields(test_post)
         self.assertEqual(test_group, self.group)
         self.assertEqual(test_post, self.post)
 
@@ -104,6 +104,9 @@ class PostsViewsTests(TestCase):
             )
         )
         self.assertEqual(response.context['author'], self.user)
+        test_post = response.context['page_obj'][0]
+        self.posts_check_all_fields(test_post)
+        self.assertEqual(test_post, self.post)
 
     def test_posts_context_post_detail_context(self):
         """Проверка post_detail сформирован с правильным контекстом-6."""
@@ -113,7 +116,7 @@ class PostsViewsTests(TestCase):
                 kwargs={'post_id': self.post.id},
             )
         )
-        self.assertEqual(response.context['post'].text, self.post.text)
+        self.assertEqual(response.context['post'], self.post)
 
     def test_posts_context_post_create_context(self):
         """Проверка post_create сформирован с правильным контекстом-7."""
@@ -121,6 +124,7 @@ class PostsViewsTests(TestCase):
             reverse('posts:create')
         )
         self.assertIsInstance(response.context['form'], PostForm)
+        self.assertFalse('is_edit' in response.context)
 
     def test_posts_context_post_edit_context(self):
         """Проверка post_edit сформирован с правильным контекстом-8."""
@@ -134,7 +138,7 @@ class PostsViewsTests(TestCase):
             response.context['form'].initial['text'],
             self.post.text
         )
-
+        self.assertTrue('is_edit' in response.context)
 
 class PostsPaginatorViewsTests(TestCase):
     @classmethod
@@ -162,14 +166,16 @@ class PostsPaginatorViewsTests(TestCase):
 
     def test_posts_if_first_page_has_ten_records(self):
         """Проверка: первая страница 10 записей."""
-        response = self.authorized_client.get(reverse('posts:index'))
-        self.assertEqual(len(response.context.get(
-            'page_obj').object_list), TEN_POSTS)
+        url = self.urls_paginator.pop()
+        response = self.authorized_client.get(url)
+        self.assertEqual(len(response.context.get( 
+            'page_obj').object_list), TEN_POSTS) 
 
     def test_posts_if_second_page_has_three_records(self):
         """Проверка: вторая страница 3 записи."""
+        url = self.urls_paginator.pop()
         response = self.authorized_client.get(
-            reverse('posts:index') + '?page=2'
+            (url) + '?page=2'
         )
         self.assertEqual(len(response.context.get(
             'page_obj').object_list), THREE_POSTS)

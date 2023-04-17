@@ -14,7 +14,7 @@ class PostCreateFormTests(TestCase):
         super().setUpClass()
         cls.author = User.objects.create_user(username='NoName')
         cls.post = Post.objects.create(
-            text='Тестовый текст',
+            text='Тестовая запись для создания нового поста',
             author=cls.author,
         )
         cls.group = Group.objects.create(
