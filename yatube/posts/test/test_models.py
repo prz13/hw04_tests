@@ -26,5 +26,5 @@ class PostModelTest(TestCase):
         символов поста метода __str__ Post."""
         self.assertEqual(
             self.post.__str__()[:15],
-                self.post.text[:15]
+            self.post.text[:15]
         )
