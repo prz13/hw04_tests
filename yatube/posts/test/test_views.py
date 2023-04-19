@@ -138,7 +138,7 @@ class PostsViewsTests(TestCase):
             response.context['form'].initial['text'],
             self.post.text
         )
-        self.assertTrue('is_edit' in response.context)
+        self.assertTrue(response.context['is_edit'])
 
 
 class PostsPaginatorViewsTests(TestCase):
@@ -167,18 +167,21 @@ class PostsPaginatorViewsTests(TestCase):
 
     def test_posts_if_first_page_has_ten_records(self):
         """Проверка: первая страница 10 записей."""
-        url = self.urls_paginator.pop()
-        response = self.authorized_client.get(url)
-        if response.context.get('page_obj'):
-            self.assertEqual(len(response.context.get(
-                'page_obj').object_list), TEN_POSTS)
+        for url in self.urls_paginator:
+            with self.subTest(msg='slug:test-slug', posts='group_list'):
+                response = self.authorized_client.get(url)
+                page_obj = response.context.get(url)
+                if page_obj is not None:
+                    self.assertEqual(len(
+                        'page_obj'), TEN_POSTS)
 
     def test_posts_if_second_page_has_three_records(self):
         """Проверка: вторая страница 3 записи."""
-        url = self.urls_paginator.pop()
-        response = self.authorized_client.get(
-            (url) + '?page=2'
-        )
-        if response.context.get('page_obj'):
-            self.assertEqual(len(response.context.get(
-                'page_obj').object_list), THREE_POSTS)
+        for url in self.urls_paginator:
+            with self.subTest(msg='slug:test-slug', posts='group_list'):
+                response = self.authorized_client.get(
+                    (url) + '?page=2')
+                page_obj = response.context.get(url)
+                if page_obj is not None:
+                    self.assertEqual(len(
+                        'page_obj'), THREE_POSTS)
