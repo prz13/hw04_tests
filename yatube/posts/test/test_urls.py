@@ -35,7 +35,7 @@ class StaticURLTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.another_user = User.objects.create_user(
-            username='any_user' ,password='password'
+            username='any_user', password='password'
         )
 
     def test_index_and_group(self):
