@@ -24,5 +24,5 @@ class PostModelTest(TestCase):
     def test_post_text(self):
         """Проверяем, что кореектно выводится первые 15
         символов поста метода __str__ Post."""
-        self.assertEqual(self.post.__str__()[:15], 
-            self.post.text[:15]) 
+        self.assertEqual(self.post.__str__()[:15],
+        self.post.text[:15])

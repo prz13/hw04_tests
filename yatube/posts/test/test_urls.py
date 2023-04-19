@@ -35,8 +35,7 @@ class StaticURLTests(TestCase):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         self.another_user = User.objects.create_user(
-                                username='any_user',
-                                password='password'
+            username='any_user',password='password'
         )
 
     def test_index_and_group(self):
@@ -64,7 +63,7 @@ class StaticURLTests(TestCase):
         url_names = {
             '/create/': '/auth/login/?next=/create/',
             '/admin/': '/admin/login/?next=/admin/',
-            f'/posts/{post_id}/edit/': 
+            f'/posts/{post_id}/edit/':
                 f'/auth/login/?next=/posts/{post_id}/edit/',
         }
         for url, redirect in url_names.items():
@@ -91,7 +90,6 @@ class StaticURLTests(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_unauthorized_user_cannot_edit_post_of_another_user(self):
-        #self.authorized_client.force_login(self.another_user)
         self.authorized_client.force_login(self.user)
         self.authorized_client.force_login(self.another_user)
         response = self.authorized_client.get(
@@ -101,4 +99,5 @@ class StaticURLTests(TestCase):
             response,
             f'/posts/{self.post.id}/'
         )
+
 
