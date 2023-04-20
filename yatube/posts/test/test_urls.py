@@ -24,19 +24,21 @@ class StaticURLTests(TestCase):
             text='Тестовая запись для создания нового поста',
         )
 
+        cls.another_user = User.objects.create_user(
+            username='any_user', password='password'
+        )
+
         cls.group = Group.objects.create(
             title=('Заголовок для группы'),
             slug='test_slug'
         )
+        
 
     def setUp(self):
         self.guest_client = Client()
         self.user = User.objects.create_user(username='NoNoName')
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
-        self.another_user = User.objects.create_user(
-            username='any_user', password='password'
-        )
 
     def test_index_and_group(self):
         """страницы группы и главная доступны всем"""
@@ -90,7 +92,6 @@ class StaticURLTests(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_unauthorized_user_cannot_edit_post_of_another_user(self):
-        self.authorized_client.force_login(self.user)
         self.authorized_client.force_login(self.another_user)
         response = self.authorized_client.get(
             f'/posts/{self.post.id}/edit/'

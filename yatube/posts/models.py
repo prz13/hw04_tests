@@ -46,4 +46,5 @@ class Post(models.Model):
         verbose_name = 'Пост'
 
     def __str__(self):
-        return self.text
+        return self.text[:15] 
+    #+ '' if len(self.text) > 15 else self.text
