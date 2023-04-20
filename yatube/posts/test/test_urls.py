@@ -32,7 +32,6 @@ class StaticURLTests(TestCase):
             title=('Заголовок для группы'),
             slug='test_slug'
         )
-        
 
     def setUp(self):
         self.guest_client = Client()
