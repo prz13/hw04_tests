@@ -1,6 +1,12 @@
+import shutil
+import tempfile
+
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.urls import reverse
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django import forms
 
 from posts.models import Group, Post, User
 from posts.forms import PostForm
@@ -10,7 +16,9 @@ User = get_user_model()
 TEN_POSTS = 10
 THREE_POSTS = 3
 
+TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
+@override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostsViewsTests(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -21,12 +29,28 @@ class PostsViewsTests(TestCase):
             slug='test-slug',
             description='Тестовое описание',
         )
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x02\x00'
+            b'\x01\x00\x80\x00\x00\x00\x00\x00'
+            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+            b'\x0A\x00\x3B'
+        )
+        cls.image_name = 'small.gif'
+        cls.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=small_gif,
+            content_type='image/gif'
+        )
 
         cls.post = Post.objects.create(
             text='Тестовая запись для создания нового поста',
             author=cls.user,
             group=cls.group,
+            image=cls.uploaded,
         )
+
         cls.templates_pages_names = {
             'posts/index.html': reverse('posts:index'),
             'posts/create_post.html': reverse('posts:create'),
@@ -47,6 +71,11 @@ class PostsViewsTests(TestCase):
                 kwargs={'post_id': cls.post.id}
             ),
         }
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
         self.authorized_client = Client()
@@ -80,6 +109,7 @@ class PostsViewsTests(TestCase):
         response = self.authorized_client.get(reverse('posts:index'))
         last_post = response.context['page_obj'][0]
         self.assertEqual(last_post, self.post)
+        self.assertTrue(last_post, 'image/gif')
 
     def test_group_page_show_correct_context(self):
         """Шаблон group_list сформирован с правильным контекстом-4."""
@@ -94,6 +124,7 @@ class PostsViewsTests(TestCase):
         self.posts_check_all_fields(test_post)
         self.assertEqual(test_group, self.group)
         self.assertEqual(test_post, self.post)
+        self.assertTrue(test_post, 'image/gif')
 
     def test_posts_context_profile_context(self):
         """Проверка profile сформирован с правильным контекстом-5."""
@@ -107,6 +138,7 @@ class PostsViewsTests(TestCase):
         test_post = response.context['page_obj'][0]
         self.posts_check_all_fields(test_post)
         self.assertEqual(test_post, self.post)
+        self.assertTrue(test_post, 'image/gif')
 
     def test_posts_context_post_detail_context(self):
         """Проверка post_detail сформирован с правильным контекстом-6."""
@@ -125,6 +157,7 @@ class PostsViewsTests(TestCase):
         )
         self.assertIsInstance(response.context['form'], PostForm)
         self.assertFalse('is_edit' in response.context)
+        self.assertTrue('posts:create', 'image/gif')
 
     def test_posts_context_post_edit_context(self):
         """Проверка post_edit сформирован с правильным контекстом-8."""
