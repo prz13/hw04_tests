@@ -1,5 +1,7 @@
 import shutil
 import tempfile
+import time
+from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
@@ -8,7 +10,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django import forms
 
-from posts.models import Group, Post, User
+from posts.models import Group, Post, User, Comment
 from posts.forms import PostForm
 
 User = get_user_model()
@@ -72,15 +74,28 @@ class PostsViewsTests(TestCase):
             ),
         }
 
+
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
+        self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client_author = Client()
         self.authorized_client.force_login(self.user)
+
+    def create_comment(self, author, text, post):
+            form_data = {
+            'author': author,
+            'text': text,
+            'post': post,
+        }
+            response = self.authorized_client.post(
+            reverse('posts:add_comment', args=(post.id,)),
+            data=form_data, follow=True)
+            return response
 
     def posts_check_all_fields(self, post):
         """Метод, проверяющий поля поста-1."""
@@ -172,6 +187,44 @@ class PostsViewsTests(TestCase):
             self.post.text
         )
         self.assertTrue(response.context['is_edit'])
+
+    def test_comment_post_authorized_user(self):
+        """Комментировать пост может только авторизованный пользователь-9."""
+        comment_count = Comment.objects.count()
+        response = self.create_comment(self.user, 'комментарий', self.post)
+        self.assertEqual(Comment.objects.count(), comment_count + 1)
+        self.assertRedirects(response, reverse(
+            'posts:post_detail',
+            args=(self.post.id,)
+        ))
+        self.assertTrue(
+            Comment.objects.filter(
+                text='комментарий'
+            ).exists()
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        comment = Comment.objects.first()
+        self.assertEqual(comment.text, 'комментарий')
+
+    def test_comment_add_unauthorized_user(self):
+        """Неавторизованный пользователь не может создавать комментарии-10."""
+        comment_count = Comment.objects.count()
+        response = self.client.post(
+            reverse('posts:add_comment', args=(self.post.id,))
+        )
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertRedirects(
+            response,
+            reverse('login') + f'?next=/posts/{self.post.id}/comment/')
+        self.assertEqual(Comment.objects.count(), comment_count)
+
+    def test_cache_index(self):
+        """Тестируем кеш index.html-11."""
+        response_1 =reverse('posts:index')
+        time.sleep(2)
+        response_2 = reverse('posts:index')
+        assert(response_1 == response_2)
+
 
 
 class PostsPaginatorViewsTests(TestCase):

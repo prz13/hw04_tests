@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from .forms import PostForm, CommentForm
 from .models import Post, Group, User
-
+from django.views.decorators.cache import cache_page
 
 User = get_user_model()
 

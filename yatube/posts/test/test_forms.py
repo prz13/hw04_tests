@@ -1,4 +1,7 @@
 import tempfile
+import shutil
+from http import HTTPStatus
+
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.contrib.auth import get_user_model
@@ -6,8 +9,9 @@ from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.conf import settings
 
-from posts.models import Group, Post
+from posts.models import Comment, Group, Post
 
+from ..forms import PostForm
 
 User = get_user_model()
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
@@ -53,7 +57,7 @@ class PostCreateFormTests(TestCase):
         )
 
     def post_create_form(self):
-        """Создали новый пост."""
+        """Создали новый пост -1."""
         # Подсчитаем количество записей
         posts_count = Post.objects.count()
         form_data = {
@@ -81,7 +85,7 @@ class PostCreateFormTests(TestCase):
         )
 
     def post_edit_forms(self):
-        """Отредактировали пост."""
+        """Отредактировали пост -2."""
         posts_count = Post.objects.count()
         form_data = {
             'text': 'Измененный текст',
