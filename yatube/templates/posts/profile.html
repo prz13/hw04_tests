@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load thumbnail %}
 {% block title %}
     {% if author.get_full_name %}
         {{ author.get_full_name }}
@@ -7,26 +8,8 @@
     {% endif %} профайл пользователя
 {% endblock %}
 {% block content %}
-{% load thumbnail %}
-<div class="mb-5">
 <h1>Все посты пользователя {% if author.get_full_name %}{{ author.get_full_name }}{% else %}{{ author }}{% endif %}</h1>
 <h3>Всего постов: {{ page_obj.paginator.count }}</h3>
-{% if following %}
-<a
-class="btn btn-lg btn-light"
-href="{% url 'posts:profile_unfollow' author.username %}" role="button"
->
-Отписаться
-</a>
-{% else %}
-<a
-  class="btn btn-lg btn-primary"
-  href="{% url 'posts:profile_follow' author.username %}" role="button"
->
-  Подписаться
-</a>
-{% endif %}
-</div>
 {% for post in page_obj %}
     <ul>
         <li>

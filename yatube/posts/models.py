@@ -1,5 +1,5 @@
 from django.db import models
-
+from posts import models as posts_models
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -72,24 +72,15 @@ class Comment(models.Model):
 
     def __str__(self):
         return str(self.text)
-
+    
 class Follow(models.Model):
     user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
+        User, on_delete=models.CASCADE,
         related_name='follower'
-    )
+        )
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
+        User, on_delete=models.CASCADE, 
         related_name='following'
-    )
-
-    class Meta:
-        constraints = (
-            models.UniqueConstraint(
-                fields=('user', 'author',), name='unique_following'
-            ),
         )
 
     def __str__(self):
