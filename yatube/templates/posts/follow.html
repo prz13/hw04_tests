@@ -1,15 +1,11 @@
 {% extends "base.html" %}
 {% load static %}
 {% load thumbnail %}
-{% load cache %}
-{% block title %}Последние обновления на сайте{% endblock %}
+{% block title %}Подписки{% endblock %}
 {% block content %}
 {% include 'posts/includes/switcher.html' %}
-<h1>Последние обновления на сайте</h1>
-  {% cache 20 index_page %}
-  {% for post in page_obj %}
-    <article>
-      <ul>
+    {% for post in page_obj %}
+    <ul>
         <li>
           Автор: {{ post.author.get_full_name }}
         </li>
@@ -27,13 +23,7 @@
       <br>
       {% if post.group %}
       <a href="{% url "posts:group_list" post.group.slug %}">все записи группы</a>
-      
       {% endif %}
-      {% if not forloop.last %}<hr>{% endif %}
-    </article>
   {% endfor %}
-  <div>
-  {% endcache %}
     {% include "posts/includes/paginator.html" %}
-  </div>
 {% endblock%}
