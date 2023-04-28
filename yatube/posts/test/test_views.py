@@ -220,12 +220,10 @@ class PostsViewsTests(TestCase):
 
     def test_cache_index(self):
         """Тестируем кеш index.html-11."""
-        response_1 =reverse('posts:index')
+        response_1 = reverse('posts:index')
         time.sleep(2)
         response_2 = reverse('posts:index')
         assert(response_1 == response_2)
-
-
 
 class PostsPaginatorViewsTests(TestCase):
     @classmethod

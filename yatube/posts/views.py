@@ -3,8 +3,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from .forms import PostForm, CommentForm
-from .models import Post, Group, User
+from .models import Follow, Post, Group, User
 from django.views.decorators.cache import cache_page
+from django.urls import reverse
 
 User = get_user_model()
 
@@ -120,3 +121,29 @@ def add_comment(request, post_id):
         comment.post = post
         comment.save()
     return redirect('posts:post_detail', post_id=post_id) 
+
+
+@login_required
+def follow_index(request):
+    template = 'posts/follow.html'
+    post_list = Post.objects.filter(author__following__user=request.user)
+    paginator = Paginator(post_list, 10)
+    page_namber = request.GET.get('page_obj')
+    page = paginator.get_page(page_namber)
+    context = {'page_obj': page}
+    return render(request, template, context)
+
+
+@login_required
+def profile_follow(request, username):
+    template = 'posts/follow.html'
+    author = get_object_or_404(User, username=username)
+    if request.user != author:
+        Follow.objects.get_or_create(user=request.user, author=author)
+    return redirect(reverse(template, args=[username]))
+
+
+@login_required
+def profile_unfollow(request, username):
+    author = get_object_or_404(User, username=username)
+    Follow.objects.filter(user=request.user, author=author).delete()

@@ -72,3 +72,25 @@ class Comment(models.Model):
 
     def __str__(self):
         return str(self.text)
+
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='following'
+    )
+
+    class Meta:
+        constraints = (
+            models.UniqueConstraint(
+                fields=('user', 'author',), name='unique_following'
+            ),
+        )
+
+    def __str__(self):
+        return str(self.user)
