@@ -29,8 +29,9 @@ def test_follow(self):
     follow = Follow.objects.ferst()
     self.assertEqual(follow.author, FollowTest.author)
     self.assertEqual(follow.user, FollowTest.follower)
-    follow.get(reverse('posts:profile_follow',
-                    args=(FollowTest.author.username,)))
+    follow.get(reverse(
+        'posts:profile_follow',
+        args=(FollowTest.author.username,)))
     self.assertEqual(Follow.objects.count(), 1)
     follows = Follow.objects.filter(
         author=FollowTest.author,
