@@ -29,7 +29,7 @@ def test_follow(self):
     follow = Follow.objects.ferst()
     self.assertEqual(follow.author, FollowTest.author)
     self.assertEqual(follow.user, FollowTest.follower)
-    follower.get(
+    follow.get(
             reverse(
                 'posts:profile_follow',
                 args=(FollowTest.author.username,)))
