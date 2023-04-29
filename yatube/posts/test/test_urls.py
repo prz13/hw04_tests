@@ -88,7 +88,7 @@ class StaticURLTests(TestCase):
 
     def test_page_404(self):
         response = self.client.get('/nonexist-page/')
-        self.assertEqual(response.status_code, 404) 
+        self.assertEqual(response.status_code, 404)
         self.assertTemplateUsed(response, 'core/404.html')
 
     def test_unauthorized_user_cannot_edit_post_of_another_user(self):
