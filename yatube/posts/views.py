@@ -112,9 +112,7 @@ def post_edit(request, post_id):
         'is_edit': True,
         'title': title,
     }
-    return render(request,
-                template,
-                context)
+    return render(request, template, context)
 
 
 @login_required
