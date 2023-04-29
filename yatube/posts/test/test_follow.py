@@ -36,7 +36,6 @@ class FollowTest(TestCase):
         self.assertEqual(follow.author, FollowTest.author)
         self.assertEqual(follow.user, FollowTest.follower)
 
-
     def test_don_t_follow(self):
         self.assertEqual(Follow.objects.count(), 0)
         Follow.objects.create(
