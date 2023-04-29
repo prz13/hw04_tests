@@ -113,8 +113,8 @@ def post_edit(request, post_id):
         'title': title,
     }
     return render(request,
-            template,
-            context)
+                template,
+                context)
 
 
 @login_required

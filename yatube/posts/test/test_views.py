@@ -19,6 +19,7 @@ THREE_POSTS = 3
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
+
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostsViewsTests(TestCase):
     @classmethod
@@ -176,7 +177,7 @@ class PostsViewsTests(TestCase):
 
     def test_cache_index(self):
         """Тестируем кеш index.html-9."""
-        response_1 =reverse('posts:index')
+        response_1 = reverse('posts:index')
         time.sleep(20)
         response_2 = reverse('posts:index')
         assert(response_1 == response_2)
@@ -271,7 +272,7 @@ class FollowTest(TestCase):
     def test_new_author_post_on_follow_index_page(self):
         """Автор написал новый пост который виден только преследователям."""
         subscription = Follow.objects.create(
-            user=self.user_biba, 
+            user=self.user_biba,
             author=self.user_boba)
         response = self.authorized_client1.get(reverse('posts:follow_index'))
         new_post_author = response.context.get(

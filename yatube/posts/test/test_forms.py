@@ -102,6 +102,5 @@ class PostCreateFormTests(TestCase):
         self.assertEqual(Post.objects.count(), posts_count)
         self.assertEqual(edit_post_var.text, form_data['text'])
         self.assertEqual(edit_post_var.author, self.post.author)
-        self.assertNotEqual(edit_post.image,
-                            self.post.image
-        )
+        self.assertNotEqual(edit_post_var.image,
+                            self.post.image)
