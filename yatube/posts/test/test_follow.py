@@ -24,18 +24,18 @@ class FollowTest(TestCase):
 
     def test_follow(self):
         self.assertEqual(Follow.objects.count(), 0)
-        self.assertEqual(Follow.objects.count(), 1)
-        follow = Follow.objects.ferst()
-        self.assertEqual(follow.author, FollowTest.author)
-        self.assertEqual(follow.user, FollowTest.follower)
-        follow.get(reverse(
-            'posts:profile_follow',
-            args=(FollowTest.author.username,)))
+        follow = Follow.objects.create(
+            author=FollowTest.author,
+            user=FollowTest.follower)
         self.assertEqual(Follow.objects.count(), 1)
         follows = Follow.objects.filter(
             author=FollowTest.author,
             user=FollowTest.follower)
         self.assertEqual(len(follows), 1)
+        follow = follows.first()
+        self.assertEqual(follow.author, FollowTest.author)
+        self.assertEqual(follow.user, FollowTest.follower)
+
 
     def test_don_t_follow(self):
         self.assertEqual(Follow.objects.count(), 0)
