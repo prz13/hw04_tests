@@ -22,7 +22,6 @@ class FollowTest(TestCase):
         self.authorized_client.force_login(
             FollowTest.follower)
 
-
     def test_follow(self):
         self.assertEqual(Follow.objects.count(), 0)
         self.assertEqual(Follow.objects.count(), 1)
@@ -37,7 +36,6 @@ class FollowTest(TestCase):
             author=FollowTest.author,
             user=FollowTest.follower)
         self.assertEqual(len(follows), 1)
-
 
     def test_don_t_follow(self):
         self.assertEqual(Follow.objects.count(), 0)
