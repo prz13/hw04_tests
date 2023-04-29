@@ -7,7 +7,6 @@ from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.contrib.auth.decorators import login_required
 
 
 from posts.models import Follow, Group, Post, User
@@ -183,32 +182,6 @@ class PostsViewsTests(TestCase):
         response_2 = reverse('posts:index')
         assert(response_1 == response_2)
 
-    @login_required
-    def follow_index(request):
-        authors = User.objects.filter(following__user=request.user)
-        posts = Post.objects.filter(author__in=authors)
-        follow_paginator = Paginator(posts, 10)
-        page_number = request.GET.get('page')
-        page = follow_paginator.get_page(page_number)
-        context = {'page': page, 'paginator': follow_paginator}
-        return render(request, 'posts/follow.html', context)
-
-
-    @login_required
-    def profile_follow(request, username):
-        author = get_object_or_404(User, username=username)
-        if request.user != author:
-            Follow.objects.get_or_create(user=request.user, author=author)
-        return redirect('posts:profile', username=username)
-
-
-    @login_required
-    def profile_unfollow(request, username):
-        author = get_object_or_404(User, username=username)
-        follow = get_object_or_404(Follow, user=request.user, author=author)
-        follow.delete()
-        return redirect('posts:profile', username=username)
-
 
 class PostsPaginatorViewsTests(TestCase):
     @classmethod
@@ -254,3 +227,52 @@ class PostsPaginatorViewsTests(TestCase):
                 if page_obj is not None:
                     self.assertEqual(len(
                         'page_obj'), THREE_POSTS)
+
+
+class FollowTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user_biba = User.objects.create_user(username='biba')
+        cls.user_boba = User.objects.create_user(username='boba')
+        cls.post = Post.objects.create(
+            text='Следуй за мной!', 
+            author=cls.user_boba
+        )
+
+    def setUp(self):
+        self.user_biba = FollowTest.user_biba
+        self.user_boba = FollowTest.user_boba
+        self.authorized_client1 = Client()
+        self.authorized_client1.force_login(self.user_biba)
+
+    def test_follow(self):
+        """Подписываесмся и отписываемся от автора."""
+        response = self.authorized_client1.get(
+            reverse(
+                'posts:profile_follow',
+                kwargs={'username': self.user_boba.username},
+            )
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(self.user_biba.following.filter(author=self.user_boba).exists())
+        response = self.authorized_client1.get(
+            reverse(
+                'posts:profile_unfollow',
+                kwargs={'username': self.user_boba.username},
+            )
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(self.user_biba.following.filter(author=self.user_boba).exists())
+
+    def test_new_author_post_on_follow_index_page(self):
+        """Автор написал новый пост который виден только преследователям."""
+        subscription = Follow.objects.create(user=self.user_biba, author=self.user_boba)
+        response = self.authorized_client1.get(reverse('posts:follow_index'))
+        new_post_author = response.context.get('page_obj').object_list[0].author
+        self.assertEqual(new_post_author, self.user_boba)
+        
+        subscription.delete()
+        response = self.authorized_client1.get(reverse('posts:follow_index'))
+        post_list = response.context.get('page_obj').object_list
+        self.assertEqual(len(post_list), 0)
