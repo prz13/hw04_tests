@@ -13,6 +13,9 @@ from . import views
 
 app_name = 'users'
 
+handler404 = 'core.views.page_not_found'
+
+
 urlpatterns = [
     path('signup/', views.SignUp.as_view(), name='signup'),
     path(
