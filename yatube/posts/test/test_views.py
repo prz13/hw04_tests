@@ -236,7 +236,7 @@ class FollowTest(TestCase):
         cls.user_biba = User.objects.create_user(username='biba')
         cls.user_boba = User.objects.create_user(username='boba')
         cls.post = Post.objects.create(
-            text='Следуй за мной!', 
+            text='Следуй за мной!',
             author=cls.user_boba
         )
 
@@ -255,7 +255,8 @@ class FollowTest(TestCase):
             )
         )
         self.assertEqual(response.status_code, 302)
-        self.assertFalse(self.user_biba.following.filter(author=self.user_boba).exists())
+        self.assertFalse(self.user_biba.following.filter(
+            author=self.user_boba).exists())
         response = self.authorized_client1.get(
             reverse(
                 'posts:profile_unfollow',
@@ -263,15 +264,17 @@ class FollowTest(TestCase):
             )
         )
         self.assertEqual(response.status_code, 302)
-        self.assertFalse(self.user_biba.following.filter(author=self.user_boba).exists())
+        self.assertFalse(self.user_biba.following.filter(
+            author=self.user_boba).exists())
 
     def test_new_author_post_on_follow_index_page(self):
         """Автор написал новый пост который виден только преследователям."""
-        subscription = Follow.objects.create(user=self.user_biba, author=self.user_boba)
+        subscription = Follow.objects.create(
+            user=self.user_biba, author=self.user_boba)
         response = self.authorized_client1.get(reverse('posts:follow_index'))
-        new_post_author = response.context.get('page_obj').object_list[0].author
+        new_post_author = response.context.get(
+            'page_obj').object_list[0].author
         self.assertEqual(new_post_author, self.user_boba)
-        
         subscription.delete()
         response = self.authorized_client1.get(reverse('posts:follow_index'))
         post_list = response.context.get('page_obj').object_list

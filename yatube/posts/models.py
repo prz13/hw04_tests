@@ -14,7 +14,6 @@ class Group(models.Model):
         return self.title
 
 
-
 class Post(models.Model):
     text = models.TextField(
         max_length=400,
