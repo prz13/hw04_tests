@@ -12,6 +12,7 @@ from posts.models import Group, Post
 User = get_user_model()
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
+
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostCreateFormTests(TestCase):
     @classmethod
@@ -86,7 +87,7 @@ class PostCreateFormTests(TestCase):
         form_data = {
             'text': 'Измененный текст',
             'group': self.group.slug,
-            'image':self.uploaded
+            'image': self.uploaded
         }
         response = self.authorized_author.post(
             reverse('posts:post_edit', kwargs={'post_id': self.post.id}),
@@ -104,4 +105,3 @@ class PostCreateFormTests(TestCase):
         self.assertNotEqual(edit_post.image,
                             self.post.image
         )
-

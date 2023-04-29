@@ -3,8 +3,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from .forms import PostForm, CommentForm
-from .models import Comment, Follow, Post, Group, User
-from django.views.decorators.cache import cache_page
+from .models import Follow, Post, Group, User
 
 User = get_user_model()
 
@@ -101,8 +100,8 @@ def post_edit(request, post_id):
     edit_post = get_object_or_404(Post, id=post_id)
     if request.user != edit_post.author:
         return redirect('posts:post_detail', post_id)
-    form = PostForm(request.POST or None, 
-                    files=request.FILES or None, 
+    form = PostForm(request.POST or None,
+                    files=request.FILES or None,
                     instance=edit_post)
     if form.is_valid():
         form.save()
@@ -114,8 +113,9 @@ def post_edit(request, post_id):
         'title': title,
     }
     return render(request,
-                template,
-                context)
+            template,
+            context)
+
 
 @login_required
 def add_comment(request, post_id):
@@ -126,7 +126,8 @@ def add_comment(request, post_id):
         comment.author = request.user
         comment.post = post
         comment.save()
-    return redirect('posts:post_detail', post_id=post_id) 
+    return redirect('posts:post_detail', post_id=post_id)
+
 
 @login_required
 def follow_index(request):
@@ -164,6 +165,7 @@ def profile_follow(request, username):
         'posts:profile',
         username=username
     )
+
 
 @login_required
 def profile_unfollow(request, username):
