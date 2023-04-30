@@ -1,5 +1,3 @@
-from http import HTTPStatus
-
 from django.test import Client, TestCase
 
 
@@ -8,7 +6,8 @@ class ViewTestClass(TestCase):
         self.client = Client()
 
 
-def test_page_404(self):
+    def test_page_404(self):
         response = self.client.get('/nonexist-page/')
         self.assertEqual(response.status_code, 404)
         self.assertTemplateUsed(response, 'core/404.html')
+
