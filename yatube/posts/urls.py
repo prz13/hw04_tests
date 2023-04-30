@@ -7,6 +7,8 @@ from . import views
 
 app_name = 'posts'
 
+handler404 = 'core.views.page_not_found'
+
 urlpatterns = [
     path('posts/<post_id>/edit/', views.post_edit, name='edit'),
     path('create/', views.post_create, name='create'),
