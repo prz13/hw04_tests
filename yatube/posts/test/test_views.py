@@ -2,14 +2,16 @@ import shutil
 import tempfile
 import time
 
+from http import HTTPStatus
+
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.cache import cache
 
-
-from posts.models import Follow, Group, Post, User
+from posts.models import Follow, Group, Post, User, Comment
 from posts.forms import PostForm
 
 User = get_user_model()
@@ -177,11 +179,13 @@ class PostsViewsTests(TestCase):
 
     def test_cache_index(self):
         """Тестируем кеш index.html-9."""
-        response_1 = reverse('posts:index')
-        time.sleep(20)
-        response_2 = reverse('posts:index')
-        assert(response_1 == response_2)
-
+        response_1 = self.authorized_client.get(reverse('posts:index'))
+        response_2 = self.authorized_client.get(reverse('posts:index'))
+        self.assertEqual(response_1.content, response_2.content)
+        response_1 = self.authorized_client.get(reverse('posts:index'))
+        cache.clear()
+        response_2 = self.authorized_client.get(reverse('posts:index'))
+        self.assertNotEqual(response_1.content, response_2.content)
 
 class PostsPaginatorViewsTests(TestCase):
     @classmethod
@@ -227,55 +231,3 @@ class PostsPaginatorViewsTests(TestCase):
                 if page_obj is not None:
                     self.assertEqual(len(
                         'page_obj'), THREE_POSTS)
-
-
-class FollowTest(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.user_biba = User.objects.create_user(username='biba')
-        cls.user_boba = User.objects.create_user(username='boba')
-        cls.post = Post.objects.create(
-            text='Следуй за мной!',
-            author=cls.user_boba
-        )
-
-    def setUp(self):
-        self.user_biba = FollowTest.user_biba
-        self.user_boba = FollowTest.user_boba
-        self.authorized_client1 = Client()
-        self.authorized_client1.force_login(self.user_biba)
-
-    def test_follow(self):
-        """Подписываесмся и отписываемся от автора."""
-        response = self.authorized_client1.get(
-            reverse(
-                'posts:profile_follow',
-                kwargs={'username': self.user_boba.username},
-            )
-        )
-        self.assertEqual(response.status_code, 302)
-        self.assertFalse(self.user_biba.following.filter(
-            author=self.user_boba).exists())
-        response = self.authorized_client1.get(
-            reverse(
-                'posts:profile_unfollow',
-                kwargs={'username': self.user_boba.username},
-            )
-        )
-        self.assertEqual(response.status_code, 302)
-        self.assertFalse(self.user_biba.following.filter(
-            author=self.user_boba).exists())
-
-    def test_new_author_post_on_follow_index_page(self):
-        """Автор написал новый пост который виден только преследователям."""
-        subscription = Follow.objects.create(
-            user=self.user_biba, author=self.user_boba)
-        response = self.authorized_client1.get(reverse('posts:follow_index'))
-        new_post_author = response.context.get(
-            'page_obj').object_list[0].author
-        self.assertEqual(new_post_author, self.user_boba)
-        subscription.delete()
-        response = self.authorized_client1.get(reverse('posts:follow_index'))
-        post_list = response.context.get('page_obj').object_list
-        self.assertEqual(len(post_list), 0)

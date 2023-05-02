@@ -1,9 +1,11 @@
-from django.core.paginator import Paginator
-from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import get_user_model
+from django.shortcuts import render, get_object_or_404, redirect
+
 from .forms import PostForm, CommentForm
 from .models import Follow, Post, Group, User
+from django.core.paginator import Paginator
+from django.contrib.auth import get_user_model
+
 
 User = get_user_model()
 
@@ -47,7 +49,7 @@ def profile(request, username):
     paginator = Paginator(post_list, POST_LIST_LIMIT)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    following = True
+    following = False
     if request.user.is_authenticated:
         following = Follow.objects.filter(
             user=request.user,
@@ -149,16 +151,10 @@ def profile_follow(request, username):
             'posts:profile',
             username=username
         )
-    follower = Follow.objects.filter(
-        user=request.user,
-        author=author
-    ).exists()
-    if follower is True:
-        return redirect(
-            'posts:profile',
-            username=username
+    Follow.objects.get_or_create(
+            user=request.user,
+            author=author
         )
-    Follow.objects.create(user=request.user, author=author)
     return redirect(
         'posts:profile',
         username=username
