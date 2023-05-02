@@ -47,7 +47,7 @@ class FollowTest(TestCase):
             author=self.user_boba).exists())
 
     def test_new_author_post_on_follow_index_page(self):
-        """Автор написал новый пост который виден только преследователям.""" 
+        """Автор написал новый пост который виден только преследователям."""
         subscription = Follow.objects.create(
             user=self.user_biba, author=self.user_boba)
         response = self.authorized_client1.get(reverse('posts:follow_index'))
