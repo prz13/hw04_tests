@@ -1,8 +1,5 @@
 import shutil
 import tempfile
-import time
-
-from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
 from django.test import Client, TestCase, override_settings
@@ -11,7 +8,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.cache import cache
 
-from posts.models import Follow, Group, Post, User, Comment
+from posts.models import Group, Post, User
 from posts.forms import PostForm
 
 User = get_user_model()
@@ -186,6 +183,7 @@ class PostsViewsTests(TestCase):
         cache.clear()
         response_2 = self.authorized_client.get(reverse('posts:index'))
         self.assertNotEqual(response_1.content, response_2.content)
+
 
 class PostsPaginatorViewsTests(TestCase):
     @classmethod
