@@ -179,7 +179,6 @@ class PostsViewsTests(TestCase):
         response_1 = self.authorized_client.get(reverse('posts:index'))
         response_2 = self.authorized_client.get(reverse('posts:index'))
         self.assertEqual(response_1.content, response_2.content)
-        response_1 = self.authorized_client.get(reverse('posts:index'))
         cache.clear()
         response_2 = self.authorized_client.get(reverse('posts:index'))
         self.assertNotEqual(response_1.content, response_2.content)
